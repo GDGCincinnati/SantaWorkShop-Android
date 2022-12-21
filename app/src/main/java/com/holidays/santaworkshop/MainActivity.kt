@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.FileProvider
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.holidays.santaworkshop.ui.theme.SantaWorkShopTheme
 import java.io.File
 import java.io.IOException
@@ -69,6 +71,27 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+
+    val storageRef = Firebase.storage.reference
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == IMAGE_CAPTURE_REQUEST_CODE && resultCode == RESULT_OK) {
+            var file = Uri.fromFile(File(currentPhotoPath))
+            val imageRef = storageRef.child("images/${file.lastPathSegment}")
+            val uploadTask = imageRef.putFile(file)
+// Register observers to listen for when the download is done or if it fails
+            uploadTask.addOnFailureListener {
+                // Handle unsuccessful uploads
+                Log.i(TAG, "onFailure")
+            }.addOnSuccessListener { taskSnapshot ->
+                // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
+                Log.i(TAG, "onSuccess")
+
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     @Throws(IOException::class)
